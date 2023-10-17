@@ -1,0 +1,61 @@
+version: '3'
+services:
+  nginx:
+    image: nginxproxy/nginx-proxy:alpine
+    container_name: nginx
+    restart: unless-stopped
+    network_mode: host
+    ports:
+      - 80:80
+      - 443:443
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - nginx_config:/etc/nginx
+      - vhost_config:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+    labels:
+      - "com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy=true"
+      - "logging=promtail"
+      - "logging_jobname=nginx"
+
+  nginx-proxy-companion:
+    image: nginxproxy/acme-companion
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - nginx_certs:/etc/nginx/certs:rw
+      - vhost_config:/etc/nginx/vhost.d
+      - nginx_html:/usr/share/nginx/html
+    volumes_from:
+      - nginx
+    environment:
+      - DEFAULT_EMAIL=example@gmail.com # change this
+    labels:
+      logging: "promtail"
+      logging_jobname: "nginx-cert"
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter
+    restart: unless-stopped
+    network_mode: host
+    ports:
+      - 9113:9113
+    command: -nginx.scrape-uri=http://127.0.0.1:2100/stub_status
+    environment:
+      - HTTP_AUTH_USERNAME=exporter # change this
+      - HTTP_AUTH_PASSWORD="change_this" # change this
+    labels:
+      logging: "promtail"
+      logging_jobname: "nginx-exporter"
+      
+volumes:
+  nginx_html:
+    driver: local
+  vhost_config:
+    driver: local
+  nginx_certs:
+    driver: local
+  nginx_config:
+    driver: local
