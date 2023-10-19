@@ -1,0 +1,129 @@
+version: '3'
+services:
+  registry:
+    image: goharbor/registry-photon:v2.8.4
+    container_name: registry
+    restart: always
+    volumes:
+      - harbor_registry_data:/storage:z
+      - harbor_registry_config:/etc/registry:z
+      - harbor_cust_cert:/harbor_cust_cert
+    user: root
+    networks:
+      - harbor
+    labels:
+      logging: "promtail"
+      logging_jobname: "harbor-registry"
+  
+  registryctl:
+    image: goharbor/harbor-registryctl:v2.8.4
+    container_name: registryctl
+    restart: always
+    user: root
+    environment:
+      - CORE_SECRET=exaMpleSecert@2023 # change this
+      - JOBSERVICE_SECRET=exaMpleSecert@2023 # change this
+    volumes:
+      - harbor_registry_data:/storage:z
+      - harbor_registry_config:/etc/registry:z
+      - harbor_registryctl_config:/etc/registryctl:z
+      - harbor_cust_cert:/harbor_cust_cert
+    networks:
+      - harbor
+    labels:
+      logging: "promtail"
+      logging_jobname: "harbor-registryctl"
+    
+  postgresql:
+    image: goharbor/harbor-db:v2.8.4
+    container_name: harbor-db
+    restart: always
+    env_file:
+      - stack.env
+    volumes:
+      - harbor_db_data:/var/lib/postgresql/data:z
+    ports:
+      - 127.0.0.1:5433:5432
+    networks:
+      harbor:
+    shm_size: '1gb'
+  core:
+    image: goharbor/harbor-core:v2.8.4
+    container_name: harbor-core
+    restart: always
+    env_file:
+      - stack.env
+    volumes:
+      - harbor_core_config:/etc/core:z
+      - harbor_core_data:/data/:z
+    networks:
+      harbor:
+    depends_on:
+      - registry
+      - harbor_redis
+      - postgresql
+    labels:
+      logging: "promtail"
+      logging_jobname: "harbor-core"
+  
+  portal:
+    image: goharbor/harbor-portal:v2.8.4
+    container_name: harbor-portal
+    restart: always
+    volumes:
+      - harbor_portal_nginx:/etc/nginx
+    networks:
+      - harbor
+    labels:
+      logging: "promtail"
+      logging_jobname: "harbor-portal"
+    environment:
+      - VIRTUAL_HOST=hub.example.com
+      - VIRTUAL_PORT=8080
+
+  jobservice:
+    image: goharbor/harbor-jobservice:v2.8.4
+    container_name: harbor-jobservice
+    restart: always
+    env_file:
+      - stack.env
+    volumes:
+      - harbor_jobservice_data:/var/log/jobs:z
+      - harbor_jobservice_config:/etc/jobservice:z
+      - harbor_cust_cert:/harbor_cust_cert
+    networks:
+      - harbor
+    depends_on:
+      - core
+    labels:
+      logging: "promtail"
+      logging_jobname: "harbor-jobservice"
+      
+  harbor_redis:
+    image: goharbor/redis-photon:v2.8.4
+    container_name: harbor_redis
+    restart: always
+
+    volumes:
+      - harbor_redis_data:/var/lib/redis
+    networks:
+      harbor:
+
+volumes:  
+  harbor_ca_data:
+  harbor_core_data:
+  harbor_jobservice_data:
+  harbor_jobservice_config:
+  harbor_redis_data:
+  harbor_registry_data:
+  harbor_registry_config:
+  harbor_db_data:
+  harbor_cust_cert:
+  harbor_core_config:
+  harbor_registryctl_config:
+  harbor_portal_nginx:
+
+  
+networks:
+  harbor:
+    external: false

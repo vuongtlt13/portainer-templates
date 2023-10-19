@@ -1,0 +1,63 @@
+version: '3'
+volumes:
+  promtail:
+    driver: local
+  loki:
+    driver: local
+  prometheus-config:
+    driver: local
+  prometheus-data:
+    driver: local
+  grafana-data:
+    driver: local
+services:
+  loki:
+    image: grafana/loki:latest
+    network_mode: host
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki:/etc/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    environment:
+      - VIRTUAL_HOST=loki.example.com
+      - VIRTUAL_PORT=3100
+
+  promtail:
+    image:  grafana/promtail:latest
+    restart: unless-stopped
+    volumes:
+      - promtail:/etc/promtail
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command: -config.file=/etc/promtail/promtail-docker-config.yaml
+    depends_on:
+      - loki
+    network_mode: host
+      
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+
+    network_mode: host
+    volumes:
+      - prometheus-config:/etc/prometheus
+      - prometheus-data:/prometheus
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+  
+  grafana:
+    image: grafana/grafana-oss:latest
+    container_name: grafana
+    network_mode: host
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=123456
+      - VIRTUAL_HOST=monitor.example.com
+      - VIRTUAL_PORT=3000
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
