@@ -1,0 +1,34 @@
+version: '3'
+services:
+  node_exporter:
+    image: vuongtlt13/node_exporter
+    container_name: node_exporter
+    command:
+      - "--path.rootfs=/host"
+    ports:
+      - 9100:9100
+    pid: host
+    restart: unless-stopped
+    volumes:
+      - '/:/host:ro,rslave'
+    environment:
+      - BASIC_AUTH_USERNAME=example # change this
+      - BASIC_AUTH_PASSWORD=example # change this
+
+  cadvisor:
+    image: vuongtlt13/cadvisor
+    container_name: cadvisor
+    ports:
+      - 8080:8080
+    command: 
+     - "--housekeeping_interval=5s"
+     - "--docker_only"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk:/dev/disk/:ro
+    environment:
+      - BASIC_AUTH_USERNAME=example # change this
+      - BASIC_AUTH_PASSWORD=example # change this
