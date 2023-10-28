@@ -1,9 +1,7 @@
-Example for Nginx Proxy with other applications
-
-Could use in [portatiner](https://www.portainer.io/)
+Example for Applications using in [Portainer](https://www.portainer.io/)
 
 List of applications:
-- Nginx Proxy (Auto SSL)
+- Nginx Proxy (Auto SSL, Auto Gen Config)
 - Wordpress 
 - Grafana + Prometheus + Loki + Promtail
 - Harbor (Docker registry)
