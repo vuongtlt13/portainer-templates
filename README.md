@@ -8,3 +8,4 @@ List of applications:
 - Node Exporter
 - CAdvisor
 - Redis
+- Mysql(Version 8)

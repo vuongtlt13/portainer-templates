@@ -1,0 +1,26 @@
+version: "3.3"
+services:
+  mysql8:
+    image: mysql:8
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql8_data:/var/lib/mysql/
+    command:
+      - '--disable-log-bin'
+    networks:
+      - mysql8_network
+    environment:
+      - MYSQL_USER=example
+      - MYSQL_PASSWORD=example
+      - MYSQL_DATABASE=example
+      - MYSQL_ROOT_PASSWORD=example
+
+volumes:
+  mysql8_data:
+
+
+networks:
+  mysql8_network:
+    name: mysql8_network
