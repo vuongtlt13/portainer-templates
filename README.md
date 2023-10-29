@@ -7,3 +7,4 @@ List of applications:
 - Harbor (Docker registry)
 - Node Exporter
 - CAdvisor
+- Redis

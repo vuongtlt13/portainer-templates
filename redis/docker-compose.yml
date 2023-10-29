@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+  redis:
+    image: redis:6-alpine
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - redis_network
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
+
+networks:
+  redis_network:
+    name: redis_network
