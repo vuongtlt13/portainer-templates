@@ -9,6 +9,8 @@ services:
       - mysql8_data:/var/lib/mysql/
     command:
       - '--disable-log-bin'
+      - '--character-set-server=utf8mb4'
+      - '--collation-server=utf8mb4_unicode_ci'
     networks:
       - mysql8_network
     environment:
