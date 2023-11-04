@@ -9,3 +9,4 @@ List of applications:
 - CAdvisor
 - Redis
 - Mysql(Version 8)
+- Metabase
