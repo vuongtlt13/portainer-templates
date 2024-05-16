@@ -22,6 +22,7 @@ services:
     command: -config.file=/etc/loki/loki-config.yaml
     environment:
       - VIRTUAL_HOST=loki.example.com
+      - LETSENCRYPT_HOST=loki.example.com
       - VIRTUAL_PORT=3100
 
   promtail:
@@ -57,6 +58,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=123456
       - VIRTUAL_HOST=monitor.example.com
+      - LETSENCRYPT_HOST=monitor.example.com
       - VIRTUAL_PORT=3000
     volumes:
       - grafana-data:/var/lib/grafana
