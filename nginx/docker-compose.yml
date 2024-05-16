@@ -29,6 +29,7 @@ services:
       - nginx_certs:/etc/nginx/certs:rw
       - vhost_config:/etc/nginx/vhost.d
       - nginx_html:/usr/share/nginx/html
+      - acme:/etc/acme.sh
     volumes_from:
       - nginx
     environment:
@@ -59,4 +60,6 @@ volumes:
   nginx_certs:
     driver: local
   nginx_config:
+    driver: local
+  acme:
     driver: local
